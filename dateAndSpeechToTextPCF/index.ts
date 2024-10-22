@@ -34,11 +34,14 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
 
         const startDateValue = context.parameters.sam_mastartdate.raw;
-        //const endDateValue = context.parameters.sam_enddate.raw;
+        const endDateValue = context.parameters.sam_enddate.raw;
+
+        // Calculate the difference in days between the start date and end date (or today's date)
+        const daysPassed = this.calculateDaysPassed(startDateValue, endDateValue);
 
         // Pass the startDateValue and endDateValue to the React component
         const props: IFlipCounterProps = {
-            startDate: startDateValue ? new Date(startDateValue) : undefined
+            daysPassed: daysPassed
         };
 
         return React.createElement(
@@ -60,5 +63,23 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
      */
     public destroy(): void {
         // Add code to cleanup control if necessary
+    }
+
+    /**
+     * Calculates the difference in days between a provided start date and end date. If no end date is provided, the function defaults to using the current date (today).
+     * @param {Date | null} startDate - The starting date from which the days passed will be calculated. If null or undefined, the function returns 0.
+     * @param {Date | null} [endDate] - The ending date until which the days passed will be calculated. If null or undefined, the function will use the current date (today).
+     * @returns {number} - The difference in days between the startDate and endDate, or between startDate and today's date if endDate is not provided. If startDate is not provided, returns 0.
+     */
+    private calculateDaysPassed(startDate?: Date | null, endDate?: Date | null): number {
+        if (!startDate) {
+            return 0; // If no start date is provided, return 0 days passed
+        }
+
+        const start = new Date(startDate);
+        const end = endDate ? new Date(endDate) : new Date(); // Use today's date if endDate is not provided
+        const timeDiff = end.getTime() - start.getTime();
+
+        return Math.floor(timeDiff / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
     }
 }

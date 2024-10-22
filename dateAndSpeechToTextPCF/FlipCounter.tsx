@@ -5,134 +5,84 @@ import './CSS/flipCounter.css';
 import { FlipUnitContainer } from './FlipClockComponents';
 
 export interface IFlipCounterProps {
-  startDate?: Date;
+  daysPassed: number; // Now we receive daysPassed directly
 }
 
-export const FlipCounter: React.FC<IFlipCounterProps> = (props) => {
-  const { startDate } = props;
+// Helper function to convert a number to an array of string digits (e.g., 12 -> ['1', '2'])
+const getDigits = (num: number): string[] => {
+  const strNum = num.toString().padStart(2, '0'); // Ensure at least two digits
+  return strNum.split('');
+};
 
-  const [daysPassed, setDaysPassed] = useState(0);
-  const [previousDaysPassed, setPreviousDaysPassed] = useState(0);
-  const [digits, setDigits] = useState<string[]>([]);
-  const [previousDigits, setPreviousDigits] = useState<string[]>([]);
-  const [shuffles, setShuffles] = useState<boolean[]>([]);
-  const [animationDuration, setAnimationDuration] = useState(100);
+// Helper function to pad an array of digits with leading zeros if needed
+const padDigitsArray = (arr: string[], length: number): string[] => {
+  const padded = arr.slice();
+  while (padded.length < length) {
+    padded.unshift('0');
+  }
+  return padded;
+};
+
+export const FlipCounter: React.FC<IFlipCounterProps> = (props) => {
+  const { daysPassed } = props; // Destructure daysPassed from props
+
+  const [currentCount, setCurrentCount] = useState(0); // State to track the current displayed count
+  const [digits, setDigits] = useState<string[]>(getDigits(0)); // Initialize with '00'
+  const [previousDigits, setPreviousDigits] = useState<string[]>(getDigits(0));
+  const [shuffles, setShuffles] = useState<boolean[]>([false, false]); // Shuffle state for animation
+  const [animationDuration, setAnimationDuration] = useState(100); // Default animation duration
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const initialDaysPassed = calculateDaysPassed(props.startDate || new Date());
-    const initialDigits = getDigits(initialDaysPassed);
-    setDaysPassed(initialDaysPassed);
-    setPreviousDaysPassed(initialDaysPassed);
-    setDigits(initialDigits);
-    setPreviousDigits(initialDigits);
-    setShuffles(initialDigits.map(() => false));
-    setAnimationDuration(100);
-
-    startCounting();
+    startCounting(); // Start counting up to the target daysPassed when component mounts
 
     return () => {
       if (intervalRef.current) {
-        clearTimeout(intervalRef.current);
-        intervalRef.current = null;
+        clearTimeout(intervalRef.current); // Cleanup the interval on component unmount
       }
     };
-  }, [props.startDate]); // Use props.startDate here
+  }, [daysPassed]); // Restart the counting effect if daysPassed changes
 
+  // Function to start the counting logic
   const startCounting = () => {
-    const targetDaysPassed = calculateDaysPassed(props.startDate || new Date());
-    let currentDaysPassed = 0;
-    const incrementStep = 1;
+    if (intervalRef.current) {
+      clearTimeout(intervalRef.current); // Clear any existing timeout before starting
+    }
 
-    const baseAnimationDuration = 100; // Starting with 100ms
-    const baseUpdateInterval = 100; // Starting with 100ms
+    let count = 0; // Start counting from 0
+    const incrementStep = 1; // Increment by 1 each time
 
     const updateCounter = () => {
-      const numbersRemaining = targetDaysPassed - currentDaysPassed;
+      if (count <= daysPassed) {
+        updateDigits(count); // Update digits with current count
+        count += incrementStep; // Increment count
 
-      let updateInterval = baseUpdateInterval;
-      let newAnimationDuration = baseAnimationDuration;
-
-      // Create a map with the number of days remaining as the key and the animation duration as the value
-      const animationDurations: { [key: number]: number } = {
-        4: 200,
-        3: 400,
-        2: 600,
-        1: 600,
-      };
-
-      // Set specific animation durations for the last 4 numbers
-      if (numbersRemaining <= 4 && numbersRemaining >= 1) {
-        // Get the corresponding animation duration
-        newAnimationDuration = animationDurations[numbersRemaining];
-        // Set the update interval to the same as the animation duration
-        updateInterval = newAnimationDuration;
-      }
-
-      if (currentDaysPassed <= targetDaysPassed) {
-        currentDaysPassed = Math.min(currentDaysPassed + incrementStep, targetDaysPassed);
-        updateDaysPassed(currentDaysPassed, newAnimationDuration);
-
-        intervalRef.current = setTimeout(updateCounter, updateInterval);
+        // Continue counting every 100ms
+        intervalRef.current = setTimeout(updateCounter, 100);
       } else {
-        // Counting complete, set interval to update every day
+        // Stop the counter when we reach daysPassed
         if (intervalRef.current) {
           clearTimeout(intervalRef.current);
-          intervalRef.current = null;
         }
-        intervalRef.current = setInterval(() => {
-          updateDaysPassed();
-        }, 1000 * 60 * 60 * 24); // Every day
       }
     };
 
-    updateCounter();
+    updateCounter(); // Start the counter
   };
 
-  const updateDaysPassed = (overrideDaysPassed?: number, newAnimationDuration?: number) => {
-    const days =
-      overrideDaysPassed !== undefined
-        ? overrideDaysPassed
-        : calculateDaysPassed(props.startDate || new Date());
+  // Function to update the displayed digits
+  const updateDigits = (count: number) => {
+    const newDigits = getDigits(count); // Convert count to digits
+    const newShuffles = newDigits.map((digit, index) => digit !== digits[index]); // Determine which digits changed
 
-    const newDigits = getDigits(days);
-    const paddedPreviousDigits = [...digits]; // Make a copy of the current digits
-    const maxLength = Math.max(paddedPreviousDigits.length, newDigits.length, 2);
-
-    const paddedDigits = padDigitsArray(newDigits, maxLength);
-    const newShuffles = paddedDigits.map(
-      (digit, index) => digit !== paddedPreviousDigits[index]
-    );
-
-    setPreviousDigits(paddedPreviousDigits); // Maintain previous digits
-    setDigits(paddedDigits); // Set the new digits
-    setShuffles(newShuffles); // Set which digits need to be shuffled
-    setDaysPassed(days); // Update days passed
-    setPreviousDaysPassed(daysPassed); // Update previous days passed
-    setAnimationDuration(newAnimationDuration ?? animationDuration); // Set animation duration
+    setPreviousDigits([...digits]); // Set previous digits for animation
+    setDigits(newDigits); // Update current digits
+    setShuffles(newShuffles); // Set which digits need to shuffle
+    setCurrentCount(count); // Update the current count state
   };
 
-  const getDigits = (num: number): string[] => {
-    const strNum = num.toString().padStart(2, '0');
-    return strNum.split('');
-  };
-
-  const padDigitsArray = (arr: string[], length: number): string[] => {
-    const padded = arr.slice();
-    while (padded.length < length) {
-      padded.unshift('0');
-    }
-    return padded;
-  };
-
-  const calculateDaysPassed = (startDate: Date): number => {
-    const today = new Date();
-    const timeDiff = today.getTime() - startDate.getTime();
-    return Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  };
-
-  // Return the JSX directly without a render method
+  // Render the component
   return (
     <div className="flip-counter">
       <div className="flipClock">
