@@ -1,5 +1,5 @@
-// FlipCounter.tsx
 import * as React from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Label } from '@fluentui/react';
 import './CSS/flipCounter.css';
 import { FlipUnitContainer } from './FlipClockComponents';
@@ -8,132 +8,145 @@ export interface IFlipCounterProps {
   startDate?: Date;
 }
 
-export interface IFlipCounterState {
-  daysPassed: number;
-  previousDaysPassed: number;
-  digits: string[];
-  previousDigits: string[];
-  shuffles: boolean[];
-}
+export const FlipCounter: React.FC<IFlipCounterProps> = (props) => {
+  const { startDate } = props;
 
-export class FlipCounter extends React.Component<IFlipCounterProps, IFlipCounterState> {
-  private interval: NodeJS.Timeout | null = null;
+  const [daysPassed, setDaysPassed] = useState(0);
+  const [previousDaysPassed, setPreviousDaysPassed] = useState(0);
+  const [digits, setDigits] = useState<string[]>([]);
+  const [previousDigits, setPreviousDigits] = useState<string[]>([]);
+  const [shuffles, setShuffles] = useState<boolean[]>([]);
+  const [animationDuration, setAnimationDuration] = useState(100);
 
-  constructor(props: IFlipCounterProps) {
-    super(props);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const startDate = props.startDate || new Date();
-    const daysPassed = this.calculateDaysPassed(startDate);
-    const digits = this.getDigits(daysPassed);
+  useEffect(() => {
+    const initialDaysPassed = calculateDaysPassed(props.startDate || new Date());
+    const initialDigits = getDigits(initialDaysPassed);
+    setDaysPassed(initialDaysPassed);
+    setPreviousDaysPassed(initialDaysPassed);
+    setDigits(initialDigits);
+    setPreviousDigits(initialDigits);
+    setShuffles(initialDigits.map(() => false));
+    setAnimationDuration(100);
 
-    this.state = {
-      daysPassed,
-      previousDaysPassed: daysPassed,
-      digits,
-      previousDigits: digits,
-      shuffles: digits.map(() => false),
+    startCounting();
+
+    return () => {
+      if (intervalRef.current) {
+        clearTimeout(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }
+  }, [props.startDate]); // Use props.startDate here
 
-  componentDidMount() {
-    // Update daysPassed every day
-    this.interval = setInterval(() => {
-      this.updateDaysPassed();
-    }, 1000 * 60 * 60 * 24); // Every day
-  }
+  const startCounting = () => {
+    const targetDaysPassed = calculateDaysPassed(props.startDate || new Date());
+    let currentDaysPassed = 0;
+    const incrementStep = 1;
 
-  componentWillUnmount() {
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
-  }
+    const baseAnimationDuration = 100; // Starting with 100ms
+    const baseUpdateInterval = 100; // Starting with 100ms
 
-  componentDidUpdate(prevProps: IFlipCounterProps) {
-    if (prevProps.startDate !== this.props.startDate) {
-      const startDate = this.props.startDate || new Date();
-      const daysPassed = this.calculateDaysPassed(startDate);
+    const updateCounter = () => {
+      const numbersRemaining = targetDaysPassed - currentDaysPassed;
 
-      // Get previous and current digits
-      const previousDigits = this.state.digits;
-      const digits = this.getDigits(daysPassed);
+      let updateInterval = baseUpdateInterval;
+      let newAnimationDuration = baseAnimationDuration;
 
-      const maxLength = Math.max(previousDigits.length, digits.length, 2); // Ensure at least length 2
+      // Create a map with the number of days remaining as the key and the animation duration as the value
+      const animationDurations: { [key: number]: number } = {
+        4: 200,
+        3: 400,
+        2: 600,
+        1: 600,
+      };
 
-      const paddedPreviousDigits = this.padDigitsArray(previousDigits, maxLength);
-      const paddedDigits = this.padDigitsArray(digits, maxLength);
+      // Set specific animation durations for the last 4 numbers
+      if (numbersRemaining <= 4 && numbersRemaining >= 1) {
+        // Get the corresponding animation duration
+        newAnimationDuration = animationDurations[numbersRemaining];
+        // Set the update interval to the same as the animation duration
+        updateInterval = newAnimationDuration;
+      }
 
-      // Determine which digits have changed
-      const shuffles = paddedDigits.map((digit, index) => digit !== paddedPreviousDigits[index]);
+      if (currentDaysPassed <= targetDaysPassed) {
+        currentDaysPassed = Math.min(currentDaysPassed + incrementStep, targetDaysPassed);
+        updateDaysPassed(currentDaysPassed, newAnimationDuration);
 
-      this.setState({
-        daysPassed,
-        previousDaysPassed: this.state.daysPassed,
-        digits: paddedDigits,
-        previousDigits: paddedPreviousDigits,
-        shuffles,
-      });
-    }
-  }
+        intervalRef.current = setTimeout(updateCounter, updateInterval);
+      } else {
+        // Counting complete, set interval to update every day
+        if (intervalRef.current) {
+          clearTimeout(intervalRef.current);
+          intervalRef.current = null;
+        }
+        intervalRef.current = setInterval(() => {
+          updateDaysPassed();
+        }, 1000 * 60 * 60 * 24); // Every day
+      }
+    };
 
-  updateDaysPassed() {
-    const startDate = this.props.startDate || new Date();
-    const daysPassed = this.calculateDaysPassed(startDate);
+    updateCounter();
+  };
 
-    // Get previous and current digits
-    const previousDigits = this.state.digits;
-    const digits = this.getDigits(daysPassed);
+  const updateDaysPassed = (overrideDaysPassed?: number, newAnimationDuration?: number) => {
+    const days =
+      overrideDaysPassed !== undefined
+        ? overrideDaysPassed
+        : calculateDaysPassed(props.startDate || new Date());
 
-    const maxLength = Math.max(previousDigits.length, digits.length, 2); // Ensure at least length 2
+    const newDigits = getDigits(days);
+    const paddedPreviousDigits = [...digits]; // Make a copy of the current digits
+    const maxLength = Math.max(paddedPreviousDigits.length, newDigits.length, 2);
 
-    const paddedPreviousDigits = this.padDigitsArray(previousDigits, maxLength);
-    const paddedDigits = this.padDigitsArray(digits, maxLength);
+    const paddedDigits = padDigitsArray(newDigits, maxLength);
+    const newShuffles = paddedDigits.map(
+      (digit, index) => digit !== paddedPreviousDigits[index]
+    );
 
-    // Determine which digits have changed
-    const shuffles = paddedDigits.map((digit, index) => digit !== paddedPreviousDigits[index]);
+    setPreviousDigits(paddedPreviousDigits); // Maintain previous digits
+    setDigits(paddedDigits); // Set the new digits
+    setShuffles(newShuffles); // Set which digits need to be shuffled
+    setDaysPassed(days); // Update days passed
+    setPreviousDaysPassed(daysPassed); // Update previous days passed
+    setAnimationDuration(newAnimationDuration ?? animationDuration); // Set animation duration
+  };
 
-    this.setState({
-      daysPassed,
-      previousDaysPassed: this.state.daysPassed,
-      digits: paddedDigits,
-      previousDigits: paddedPreviousDigits,
-      shuffles,
-    });
-  }
+  const getDigits = (num: number): string[] => {
+    const strNum = num.toString().padStart(2, '0');
+    return strNum.split('');
+  };
 
-  getDigits(num: number): string[] {
-    const strNum = num.toString().padStart(2, '0'); // Ensure at least two digits
-    return strNum.split(''); // Return each digit as an array item
-  }
-
-  padDigitsArray(arr: string[], length: number): string[] {
+  const padDigitsArray = (arr: string[], length: number): string[] => {
     const padded = arr.slice();
     while (padded.length < length) {
       padded.unshift('0');
     }
     return padded;
-  }
+  };
 
-  calculateDaysPassed(startDate: Date): number {
+  const calculateDaysPassed = (startDate: Date): number => {
     const today = new Date();
     const timeDiff = today.getTime() - startDate.getTime();
-    return Math.floor(timeDiff / (1000 * 60 * 60 * 24)); // Return full days passed
-  }
+    return Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  };
 
-  render() {
-    return (
-      <div className="flip-counter">
-        <div className="flipClock">
-          {this.state.digits.map((digit, index) => (
-            <FlipUnitContainer
-              key={index}
-              digit={digit}
-              previousDigit={this.state.previousDigits[index]}
-              shuffle={this.state.shuffles[index]}
-            />
-          ))}
-        </div>
-        <Label>Days Since Start</Label>
+  // Return the JSX directly without a render method
+  return (
+    <div className="flip-counter">
+      <div className="flipClock">
+        {digits.map((digit, index) => (
+          <FlipUnitContainer
+            key={index}
+            digit={digit}
+            previousDigit={previousDigits[index]}
+            shuffle={shuffles[index]}
+            animationDuration={animationDuration}
+          />
+        ))}
       </div>
-    );
-  }
-}
+      <Label>Days Since Start</Label>
+    </div>
+  );
+};

@@ -33,10 +33,13 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
      */
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
 
-        const startDateValue = context.parameters.sampleProperty.raw;
+        const startDateValue = context.parameters.sam_mastartdate.raw;
+        //const endDateValue = context.parameters.sam_enddate.raw;
 
-        // Pass the startDateValue to the React component as the start date
-        const props: IFlipCounterProps = { startDate: startDateValue ? new Date(startDateValue) : undefined };
+        // Pass the startDateValue and endDateValue to the React component
+        const props: IFlipCounterProps = {
+            startDate: startDateValue ? new Date(startDateValue) : undefined
+        };
 
         return React.createElement(
             FlipCounter, props
@@ -48,7 +51,7 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
      * @returns an object based on nomenclature defined in manifest, expecting object[s] for property marked as "bound" or "output"
      */
     public getOutputs(): IOutputs {
-        return { };
+        return {};
     }
 
     /**
