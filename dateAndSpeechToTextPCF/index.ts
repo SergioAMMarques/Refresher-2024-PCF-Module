@@ -1,10 +1,11 @@
 import { IInputs, IOutputs } from "./generated/ManifestTypes";
-import { FlipCounter, IFlipCounterProps } from "./FlipCounter";
 import * as React from "react";
+import { ContainerPCF, IContainerPCFProps } from "./ContainerPCF";
 
 export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<IInputs, IOutputs> {
     private theComponent: ComponentFramework.ReactControl<IInputs, IOutputs>;
     private notifyOutputChanged: () => void;
+    private contextObj: ComponentFramework.Context<IInputs>;
 
     /**
      * Empty constructor.
@@ -35,17 +36,17 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
 
         const startDateValue = context.parameters.sam_mastartdate.raw;
         const endDateValue = context.parameters.sam_enddate.raw;
+        const activityDescription = context.parameters.sam_activitydescription.raw || "";
 
         // Calculate the difference in days between the start date and end date (or today's date)
         const daysPassed = this.calculateDaysPassed(startDateValue, endDateValue);
 
-        // Pass the startDateValue and endDateValue to the React component
-        const props: IFlipCounterProps = {
-            daysPassed: daysPassed
+        const props: IContainerPCFProps = {
+            daysPassed: daysPassed,
         };
 
         return React.createElement(
-            FlipCounter, props
+            ContainerPCF, props
         );
     }
 
@@ -81,5 +82,17 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
         const timeDiff = end.getTime() - start.getTime();
 
         return Math.floor(timeDiff / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
+    }
+
+    /**
+     * Setter function to update the activity description.
+     * This function is now a separate method within the class.
+     * @param newDescription - The new description to set.
+     */
+    private setActivityDescription = (newDescription: string): void => {
+        if (this.contextObj.parameters.sam_activitydescription) {
+            this.contextObj.parameters.sam_activitydescription.raw = newDescription;
+            this.notifyOutputChanged();
+        }
     }
 }
