@@ -24,6 +24,7 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
         notifyOutputChanged: () => void,
         state: ComponentFramework.Dictionary
     ): void {
+        this.contextObj = context;
         this.notifyOutputChanged = notifyOutputChanged;
     }
 
@@ -36,13 +37,27 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
 
         const startDateValue = context.parameters.sam_mastartdate.raw;
         const endDateValue = context.parameters.sam_enddate.raw;
-        const activityDescription = context.parameters.sam_activitydescription.raw || "";
+
+        // Ensure that activityDescription is a string (use empty string if it's null)
+        const activityDescription: string = context.parameters.sam_activitydescription.raw ?? "";
 
         // Calculate the difference in days between the start date and end date (or today's date)
         const daysPassed = this.calculateDaysPassed(startDateValue, endDateValue);
 
+        const onSpeechResult = (transcript: string): void => {
+            // Concatenate the existing description with the transcript
+            const updatedDescription = `${activityDescription} ${transcript}`.trim();
+
+            // Assign the updated description to sam_activitydescription.raw, ensure null where expected
+            context.parameters.sam_activitydescription.raw = updatedDescription === "" ? null : updatedDescription;
+
+            // Notify Power Apps that the output has changed
+            this.notifyOutputChanged();
+        };
+
         const props: IContainerPCFProps = {
             daysPassed: daysPassed,
+            onSpeechResult: onSpeechResult, // Pass the speech handler to the container
         };
 
         return React.createElement(
@@ -55,7 +70,9 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
      * @returns an object based on nomenclature defined in manifest, expecting object[s] for property marked as "bound" or "output"
      */
     public getOutputs(): IOutputs {
-        return {};
+        return {
+            sam_activitydescription: this.contextObj.parameters.sam_activitydescription.raw ?? undefined
+        };
     }
 
     /**
@@ -90,9 +107,12 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
      * @param newDescription - The new description to set.
      */
     private setActivityDescription = (newDescription: string): void => {
-        if (this.contextObj.parameters.sam_activitydescription) {
+        if (this.contextObj && this.contextObj.parameters && this.contextObj.parameters.sam_activitydescription) {
             this.contextObj.parameters.sam_activitydescription.raw = newDescription;
             this.notifyOutputChanged();
+        } else {
+            console.error("contextObj or parameters is undefined.");
         }
     }
+
 }
