@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="sam" constructor="dateAndSpeechToTextPCF" version="0.0.1" display-name-key="dateAndSpeechToTextPCF" description-key="dateAndSpeechToTextPCF description" control-type="virtual" >
+  <control namespace="sam" constructor="dateAndSpeechToTextPCF" version="0.0.2" display-name-key="dateAndSpeechToTextPCF" description-key="dateAndSpeechToTextPCF description" control-type="virtual" >
     <!--external-service-usage node declares whether this 3rd party PCF control is using external service or not, if yes, this control will be considered as premium and please also add the external domain it is using.
     If it is not using any external service, please set the enabled="false" and DO NOT add any domain below. The "enabled" will be false by default.
     Example1:
@@ -18,6 +18,7 @@
       -->
     </external-service-usage>
     <!-- property node identifies a specific, configurable piece of data that the control expects from CDS -->
+    <property name="sam_pcffield" display-name-key="PCF Field" description-key="" of-type="SingleLine.Text" usage="bound" required="true" />
     <property name="sam_mastartdate" display-name-key="Start Date" description-key="Required field to track when the maintenance activity starts." of-type="DateAndTime.DateAndTime" usage="bound" required="true" />
     <property name="sam_enddate" display-name-key="End Date" description-key="Required field to track when the maintenance activity is completed." of-type="DateAndTime.DateAndTime" usage="bound" required="true" />
     <property name="sam_activitydescription" display-name-key="Activity Description" description-key="Required field for a detailed description of the maintenance activity." of-type="SingleLine.TextArea" usage="bound" required="true" />
@@ -37,6 +38,7 @@
       <platform-library name="React" version="16.8.6" />
       <platform-library name="Fluent" version="8.29.0" />
       <css path="css/dateAndSpeechToTextPCF.css" order="1" />
+      <css path="css/flipCounter.css" order="2"/>
       <!-- UNCOMMENT TO ADD MORE RESOURCES
       <resx path="strings/dateAndSpeechToTextPCF.1033.resx" version="1.0.0" />
       -->
