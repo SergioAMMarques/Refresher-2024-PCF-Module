@@ -55,9 +55,14 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
             this.notifyOutputChanged();
         };
 
+        const status = context.parameters.statuscode.raw ?? 0;
+        const cost = context.parameters.sam_cost.raw ?? 0;
+
         const props: IContainerPCFProps = {
             daysPassed: daysPassed,
             onSpeechResult: onSpeechResult, // Pass the speech handler to the container
+            status: status,
+            cost: cost
         };
 
         return React.createElement(
