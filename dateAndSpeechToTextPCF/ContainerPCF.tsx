@@ -2,6 +2,7 @@ import * as React from 'react';
 import { FlipCounter } from './FlipCounter';
 import { VoiceInput } from './VoiceInput';
 import { StatusView } from './StatusView';
+import { CostView } from './CostView';
 
 export interface IContainerPCFProps {
     daysPassed: number;
@@ -16,15 +17,6 @@ export const ContainerPCF: React.FC<IContainerPCFProps> = ({ daysPassed, onSpeec
             <div className="flex-container">
                 <style>
                     {`
-
-                        .control-container {
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            width: fit-content;
-                            height: fit-content;
-                            padding: 1rem;
-                        }
 
                         .flex-container {
                             display: flex;
@@ -43,7 +35,7 @@ export const ContainerPCF: React.FC<IContainerPCFProps> = ({ daysPassed, onSpeec
                     <StatusView  status={status}/>
                 </div>
                 <div className='maintenanceCost'>
-                    
+                    <CostView cost={cost} />
                 </div>
             </div>
         </>
