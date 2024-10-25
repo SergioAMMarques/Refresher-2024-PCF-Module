@@ -35,34 +35,36 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
      */
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
 
+        // Retrieve the start date value from the context
         const startDateValue = context.parameters.sam_mastartdate.raw;
+
+        // Retrieve the end date value from the context
         const endDateValue = context.parameters.sam_enddate.raw;
 
-        // Ensure that activityDescription is a string (use empty string if it's null)
+        // Ensure that activityDescription is a string (if it is null, it is set to an empty string)
         const activityDescription: string = context.parameters.sam_activitydescription.raw ?? "";
 
         // Calculate the difference in days between the start date and end date (or today's date)
         const daysPassed = this.calculateDaysPassed(startDateValue, endDateValue);
 
+        // Define the speech handler function
         const onSpeechResult = (transcript: string): void => {
-            // Concatenate the existing description with the transcript
-            const updatedDescription = `${activityDescription} ${transcript}`.trim();
-
-            // Assign the updated description to sam_activitydescription.raw, ensure null where expected
-            context.parameters.sam_activitydescription.raw = updatedDescription === "" ? null : updatedDescription;
-
-            // Notify Power Apps that the output has changed
-            this.notifyOutputChanged();
+            this.updateActivityDescription(activityDescription, transcript);
         };
 
+        // Retrieve the status code value from the context
         const status = context.parameters.statuscode.raw ?? 0;
+
+        // Retrieve the cost value from the context
         const cost = context.parameters.sam_cost.raw ?? 0;
 
+        // Create the props object to pass to the ContainerPCF component
         const props: IContainerPCFProps = {
             daysPassed: daysPassed,
             onSpeechResult: onSpeechResult, // Pass the speech handler to the container
             status: status,
-            cost: cost
+            cost: cost,
+            startDate: startDateValue
         };
 
         return React.createElement(
@@ -95,29 +97,39 @@ export class dateAndSpeechToTextPCF implements ComponentFramework.ReactControl<I
      * @returns {number} - The difference in days between the startDate and endDate, or between startDate and today's date if endDate is not provided. If startDate is not provided, returns 0.
      */
     private calculateDaysPassed(startDate?: Date | null, endDate?: Date | null): number {
+
+        //If theres no start date, return 0 days passed
         if (!startDate) {
-            return 0; // If no start date is provided, return 0 days passed
+            return 0;
         }
 
+        // Convert the start date to a Date object
         const start = new Date(startDate);
-        const end = endDate ? new Date(endDate) : new Date(); // Use today's date if endDate is not provided
+
+        // Convert the end date to a Date object. If theres no end date, use today's date
+        const end = endDate ? new Date(endDate) : new Date();
+
+        // Calculate the difference in milliseconds between the two dates
         const timeDiff = end.getTime() - start.getTime();
 
-        return Math.floor(timeDiff / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
+        // Convert the time difference from milliseconds to days and return the result
+        return Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     }
 
     /**
-     * Setter function to update the activity description.
-     * This function is now a separate method within the class.
-     * @param newDescription - The new description to set.
+     * Updates the activity description by appending the transcript and notifying Power Apps.
+     * @param currentDescription - The current activity description.
+     * @param transcript - The new transcript to append.
      */
-    private setActivityDescription = (newDescription: string): void => {
-        if (this.contextObj && this.contextObj.parameters && this.contextObj.parameters.sam_activitydescription) {
-            this.contextObj.parameters.sam_activitydescription.raw = newDescription;
-            this.notifyOutputChanged();
-        } else {
-            console.error("contextObj or parameters is undefined.");
-        }
+    private updateActivityDescription(currentDescription: string, transcript: string): void {
+        
+        // Append the transcript to the current description and trim any leading or trailing whitespace
+        const updatedDescription = `${currentDescription} ${transcript}`.trim();
+
+        // Update the context object with the new description (or null if the description is empty)
+        this.contextObj.parameters.sam_activitydescription.raw = updatedDescription === "" ? null : updatedDescription;
+
+        this.notifyOutputChanged();
     }
 
 }

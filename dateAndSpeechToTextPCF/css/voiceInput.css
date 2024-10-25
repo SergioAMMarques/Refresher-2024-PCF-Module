@@ -25,6 +25,11 @@
     flex-direction: column;
 }
 
+.voice-input button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6; /* Opcional: reduz a opacidade para indicar o estado desabilitado */
+}
+
 .voice-input button svg {
     fill: white;
 }

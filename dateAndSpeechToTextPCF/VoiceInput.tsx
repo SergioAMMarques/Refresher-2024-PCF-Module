@@ -4,9 +4,11 @@ import './css/voiceInput.css';
 
 interface IVoiceInputProps {
     onSpeechResult: (transcript: string) => void;
+    status: number;
+    startDate: Date | null;
 }
 
-export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult }) => {
+export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult, status, startDate }) => {
     const { isListening, transcript, startListening, stopListening } = useSpeechToText();
     const [isExpanded, setIsExpanded] = React.useState(false);
     const [isSpeaking, setIsSpeaking] = React.useState(false);
@@ -44,7 +46,7 @@ export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult }) => {
 
     return (
         <div className="voice-input">
-            <button
+            <button disabled={status === 918550004 || !startDate}
                 onClick={() => {
                     toggleExpand();
                     startStopListening();

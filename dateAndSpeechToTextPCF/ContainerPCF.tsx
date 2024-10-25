@@ -10,14 +10,15 @@ export interface IContainerPCFProps {
     onSpeechResult: (transcript: string) => void; // Function to send speech result to index.ts
     status: number;
     cost: number;
+    startDate: Date | null;
 }
 
-export const ContainerPCF: React.FC<IContainerPCFProps> = ({ daysPassed, onSpeechResult, status, cost }) => {
+export const ContainerPCF: React.FC<IContainerPCFProps> = ({ daysPassed, onSpeechResult, status, cost, startDate }) => {
     return (
         <>
             <div className="flex-container">
                 <div className="featureContainer">
-                    <VoiceInput onSpeechResult={onSpeechResult} />
+                    <VoiceInput onSpeechResult={onSpeechResult} status={status} startDate={startDate} />
                 </div>
                 <div className="featureContainer">
                     <FlipCounter daysPassed={daysPassed} />
