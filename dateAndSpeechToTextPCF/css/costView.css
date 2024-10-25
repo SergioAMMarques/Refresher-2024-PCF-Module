@@ -1,0 +1,33 @@
+.cost-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cost-label {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.cost-value {
+    display: flex;
+    align-items: baseline;
+}
+
+.symbol {
+    font-size: 28px;
+    font-weight: lighter;
+}
+
+.pounds {
+    font-size: 56px;
+    /* Double the size */
+    font-weight: bolder;
+}
+
+.cents {
+    font-size: 20px;
+    /* Smaller size for cents */
+    font-weight: lighter;
+    /* Thinner font weight */
+}

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Label } from '@fluentui/react';
+import './css/statusView.css';
 
 export interface IStatusViewProps {
     status: number;
@@ -36,22 +37,15 @@ export const StatusView: React.FC<IStatusViewProps> = ({ status }) => {
     };
 
     return (
-        <div style={{ textAlign: 'center', padding: '10px' }}>
-            {/* Label for Maintenance */}
-            <Label style={{ fontSize: '18px', fontWeight: 'bold' }}>Maintenance</Label>
-            
-            {/* Status Container */}
+        <div className="status-view-container">
+            <Label className="status-view-maintenance-label">Maintenance</Label>
             <div
+                className="status-view-status-container"
                 style={{
-                    marginTop: '10px',
-                    padding: '5px 15px',
-                    borderRadius: '10px',
-                    border: `2px solid ${statusInfo.color}`,
-                    backgroundColor: getLighterColor(statusInfo.color),  // Lighter background color
-                    display: 'inline-block'
+                    backgroundColor: getLighterColor(statusInfo.color)
                 }}
             >
-                <Label style={{ color: statusInfo.color, fontWeight: 'bold' }}>
+                <Label className="status-view-status-label" style={{ color: statusInfo.color }}>
                     {statusInfo.label}
                 </Label>
             </div>
