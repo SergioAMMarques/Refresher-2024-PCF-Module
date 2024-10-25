@@ -21,13 +21,10 @@
 
 .pounds {
     font-size: 56px;
-    /* Double the size */
     font-weight: bolder;
 }
 
 .cents {
     font-size: 20px;
-    /* Smaller size for cents */
     font-weight: lighter;
-    /* Thinner font weight */
 }

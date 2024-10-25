@@ -9,12 +9,19 @@ interface IVoiceInputProps {
 }
 
 export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult, status, startDate }) => {
+
+    // Use the custom hook to get the speech-to-text functionality
     const { isListening, transcript, startListening, stopListening } = useSpeechToText();
+
+    // State to manage the expanded state of the voice input
     const [isExpanded, setIsExpanded] = React.useState(false);
+
+    // State to manage the speaking state of the voice input
     const [isSpeaking, setIsSpeaking] = React.useState(false);
 
-    // Set isSpeaking true briefly upon detecting new transcript
+    // Effect to manage the speaking state of the voice input
     React.useEffect(() => {
+        // If there is a transcript, set speaking to true and reset after 1 second
         if (transcript) {
             setIsSpeaking(true);
             const speakingTimeout = setTimeout(() => setIsSpeaking(false), 1000); // 1-second timeout to reset
@@ -23,10 +30,12 @@ export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult, status,
         }
     }, [transcript]);
 
+    // Function to start or stop listening
     const startStopListening = () => {
         isListening ? stopVoiceInput() : startListening();
     };
 
+    // Function to stop voice input and send the transcript to the parent component
     const stopVoiceInput = () => {
         if (transcript) {
             onSpeechResult(transcript);
@@ -34,10 +43,12 @@ export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult, status,
         stopListening();
     };
 
+    // Function to toggle the expanded state of the voice input
     const toggleExpand = () => {
         setIsExpanded(!isExpanded);
     };
 
+    // Function to dismiss the voice input and stop listening
     const handleDismiss = () => {
         stopVoiceInput();
         stopListening(); // Ensure listening fully stops
@@ -51,7 +62,6 @@ export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult, status,
                     toggleExpand();
                     startStopListening();
                 }}
-                aria-label="Voice Input"
                 className={`${isExpanded ? 'expanded' : ''}`}
             >
                 {!isExpanded && (
@@ -64,14 +74,7 @@ export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult, status,
                                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4.21 4.387.083-.094a1 1 0 0 1 1.32-.083l.094.083L12 10.585l6.293-6.292a1 1 0 1 1 1.414 1.414L13.415 12l6.292 6.293a1 1 0 0 1 .083 1.32l-.083.094a1 1 0 0 1-1.32.083l-.094-.083L12 13.415l-6.293 6.292a1 1 0 0 1-1.414-1.414L10.585 12 4.293 5.707a1 1 0 0 1-.083-1.32l.083-.094-.083.094Z" fill="#212121"/></svg>
                             </button>
                         </div>
-                        <div
-                            className={`transcript-box ${isSpeaking ? 'speaking' : ''}`}
-                            style={{
-                                boxShadow: isSpeaking
-                                    ? '0 0 15px rgba(0, 128, 255, 0.8)'
-                                    : '0 0 8px rgba(0, 128, 255, 0.5)',
-                            }}
-                        >
+                        <div className={`transcript-box ${isSpeaking ? 'speaking' : ''}`}>
                             <p>{transcript}</p>
                         </div>
                     </>

@@ -6,35 +6,24 @@ export interface IStatusViewProps {
     status: number;
 }
 
+// Interface to be used for the status info
 interface IStatusInfo {
     label: string;
     color: string;
+    backgroundColor: string;
 }
 
 export const StatusView: React.FC<IStatusViewProps> = ({ status }) => {
+
+    // Map of status codes to status info (label, color, background color)
     const statusInfoMap: Record<number, IStatusInfo> = {
-        918550001: { label: 'Scheduled', color: 'blue' },
-        918550002: { label: 'In Progress', color: 'orange' },
-        918550004: { label: 'Completed', color: 'green' },
+        918550001: { label: 'Scheduled', color: '#000080', backgroundColor: '#cce5ff' },
+        918550002: { label: 'In Progress', color: 'orange', backgroundColor: '#ffebcc' },
+        918550004: { label: 'Completed', color: 'green', backgroundColor: '#ccffcc' },
     };
 
-    const statusInfo = statusInfoMap[status] || { label: 'Unknown', color: 'grey' };
-
-    // Function to get a lighter version of the color by adding transparency
-    const getLighterColor = (color: string) => {
-        switch (color) {
-            case 'blue':
-                return '#cce5ff'; // Lighter blue
-            case 'orange':
-                return '#ffebcc'; // Lighter orange
-            case 'green':
-                return '#ccffcc'; // Lighter green
-            case 'grey':
-                return '#e0e0e0'; // Lighter grey
-            default:
-                return '#f0f0f0'; // Fallback light color
-        }
-    };
+    // Get the status info based on the status code (if not found, use 'Unknown' label with grey color and light grey background)
+    const statusInfo = statusInfoMap[status] || { label: 'Unknown', color: 'grey', backgroundColor: '#e0e0e0' };
 
     return (
         <div className="status-view-container">
@@ -42,10 +31,15 @@ export const StatusView: React.FC<IStatusViewProps> = ({ status }) => {
             <div
                 className="status-view-status-container"
                 style={{
-                    backgroundColor: getLighterColor(statusInfo.color)
+                    backgroundColor: statusInfo.backgroundColor,
                 }}
             >
-                <Label className="status-view-status-label" style={{ color: statusInfo.color }}>
+                <Label 
+                    className="status-view-status-label"
+                    style={{
+                        color: statusInfo.color
+                    }}
+                >
                     {statusInfo.label}
                 </Label>
             </div>

@@ -7,6 +7,8 @@ export interface ICostViewProps {
 }
 
 export const CostView: React.FC<ICostViewProps> = ({ cost }) => {
+
+  // Split the cost into dollars and cents
   const [pounds, cents] = cost.toFixed(2).split('.');
 
   return (

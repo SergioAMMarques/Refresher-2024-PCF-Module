@@ -1,10 +1,9 @@
 import * as React from 'react';
 
-// AnimatedCard Component
 interface AnimatedCardProps {
     animation: string;
     digit: string;
-    style?: React.CSSProperties; // Add optional style prop
+    style?: React.CSSProperties;
 }
 
 export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation, digit, style }) => {
@@ -15,7 +14,6 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation, digit, st
     );
 };
 
-// StaticCard Component
 interface StaticCardProps {
     position: string;
     digit: string;
@@ -29,12 +27,11 @@ export const StaticCard: React.FC<StaticCardProps> = ({ position, digit }) => {
     );
 };
 
-// FlipUnitContainer Component
 interface FlipUnitContainerProps {
     digit: string;
     previousDigit: string;
     shuffle: boolean;
-    animationDuration: number; // Control animation speed
+    animationDuration: number;
 }
 
 export const FlipUnitContainer: React.FC<FlipUnitContainerProps> = ({
@@ -43,9 +40,9 @@ export const FlipUnitContainer: React.FC<FlipUnitContainerProps> = ({
     shuffle,
     animationDuration,
 }) => {
-    // Default digits to "00" when not calculating or no valid digit is available
-    const currentDigit = digit || '0'; // Default to '0' if digit is undefined or empty
-    const previousDigitValue = previousDigit || '0'; // Default to '0' for previous digit
+    // If the previous digit is not provided, default to '0'
+    const currentDigit = digit || '0';
+    const previousDigitValue = previousDigit || '0';
 
     // Show the current digit in the upper part of the card
     const upperCardDigit = currentDigit;
@@ -57,13 +54,8 @@ export const FlipUnitContainer: React.FC<FlipUnitContainerProps> = ({
 
     return (
         <div className="flipUnitContainer">
-            {/* Upper card shows the current digit */}
             <StaticCard position="upperCard" digit={upperCardDigit} />
-
-            {/* Lower card shows the current digit - 1 during the animation, or the current digit otherwise */}
             <StaticCard position="lowerCard" digit={lowerCardDigit} />
-
-            {/* Animated cards handle the transition from previous digit to new digit */}
             {shuffle && (
                 <>
                     <AnimatedCard key={`fold-${previousDigitValue}`} digit={previousDigitValue} animation="fold" />
