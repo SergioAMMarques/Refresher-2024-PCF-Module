@@ -18,8 +18,10 @@
     cursor: pointer;
     transition: all 0.5s ease;
     display: flex;
-    align-items: center; /* Center SVG vertically */
-    justify-content: center; /* Center SVG horizontally */
+    align-items: center;
+    /* Center SVG vertically */
+    justify-content: center;
+    /* Center SVG horizontally */
     flex-direction: column;
 }
 
@@ -36,7 +38,8 @@
     border-radius: 11px;
     padding: 10px;
     box-sizing: border-box;
-    justify-content: space-between; /* Space out elements in expanded view */
+    justify-content: space-between;
+    /* Space out elements in expanded view */
 }
 
 /* Dismiss button at the top of the expanded box */
@@ -45,6 +48,23 @@
     text-align: right;
     margin-bottom: 5px;
 }
+
+.buttonDismiss {
+    background-color: #dbdbdb;
+    color: white;
+    border: none;
+    width: 20px !important;
+    /* Override any conflicting styles */
+    height: 20px !important;
+    /* Override any conflicting styles */
+    border-radius: 1px;
+    padding: 3px !important;
+    /* Ensure no padding adds extra space */
+    cursor: pointer;
+}
+
+
+
 
 /* Transcript box fills remaining space */
 /* Default subtle glow effect */
@@ -59,10 +79,12 @@
     width: 100%;
     max-height: 100%;
     font-size: 0.9em;
-    transition: box-shadow 0.3s ease; /* Smooth transition */
+    transition: box-shadow 0.3s ease;
+    /* Smooth transition */
 }
 
 /* Stronger glow when speech is detected */
 .transcript-box.speaking {
-    box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); /* Brighter blue glow */
+    box-shadow: 0 0 15px rgba(0, 128, 255, 0.8);
+    /* Brighter blue glow */
 }
