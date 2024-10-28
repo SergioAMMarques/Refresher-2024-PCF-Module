@@ -1,44 +1,42 @@
-/* CSS for the container PCF control */
 .flex-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem; /* Relative spacing between elements */
+    gap: 1rem;
     justify-content: space-between;
     padding: 0.5rem;
 
 }
 
 .flex-container > div {
-    flex: 1 1 48%; /* Two items per row for medium to large screens */
+    flex: 1 1 48%;
 }
 
 @media (max-width: 768px) {
     .flex-container {
-        flex-direction: column; /* Stack items vertically for small screens */
+        flex-direction: column;
     }
 
     .flex-container > div {
-        flex: 1 1 100%; /* Each item takes full width on small screens */
+        flex: 1 1 100%;
     }
 
     .featureContainer {
-        min-height: 133px; /* Fixed height for small screens */
-        min-width: 100%; /* Full width for small screens */
+        min-height: 133px;
+        min-width: 100%;
     }
 }
 
 @media (min-width: 1200px) {
     .flex-container > div {
-        flex: 1 1 23%; /* Four items per row for larger screens */
+        flex: 1 1 23%;
     }
 }
 
-/*CSS for the container of each feature*/
 .featureContainer {
     background-color: #fafafa;
     border-radius: 11px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1), /* Soft shadow */
-                0px 1px 3px rgba(0, 0, 0, 0.06); /* Subtle secondary shadow */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1),
+                0px 1px 3px rgba(0, 0, 0, 0.06);
     padding: 2rem;
     min-width: 200px;
 }

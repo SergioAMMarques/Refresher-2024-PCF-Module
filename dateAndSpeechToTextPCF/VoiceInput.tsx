@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import useSpeechToText from './Hook/useSpeechToText';
 import './css/voiceInput.css';
 
@@ -14,13 +15,13 @@ export const VoiceInput: React.FC<IVoiceInputProps> = ({ onSpeechResult, status,
     const { isListening, transcript, startListening, stopListening } = useSpeechToText();
 
     // State to manage the expanded state of the voice input
-    const [isExpanded, setIsExpanded] = React.useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     // State to manage the speaking state of the voice input
-    const [isSpeaking, setIsSpeaking] = React.useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     // Effect to manage the speaking state of the voice input
-    React.useEffect(() => {
+    useEffect(() => {
         // If there is a transcript, set speaking to true and reset after 1 second
         if (transcript) {
             setIsSpeaking(true);

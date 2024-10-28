@@ -18,6 +18,7 @@ export const StatusView: React.FC<IStatusViewProps> = ({ status }) => {
     // Map of status codes to status info (label, color, background color)
     const statusInfoMap: Record<number, IStatusInfo> = {
         918550001: { label: 'Scheduled', color: '#000080', backgroundColor: '#cce5ff' },
+        918550003: { label: 'On Hold', color: 'purple', backgroundColor: '#e5ccff' },	
         918550002: { label: 'In Progress', color: 'orange', backgroundColor: '#ffebcc' },
         918550004: { label: 'Completed', color: 'green', backgroundColor: '#ccffcc' },
     };
